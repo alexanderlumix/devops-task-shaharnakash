@@ -5,4 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: product-reader-go
-    network_mode: host
+    ports:
+      - "8080:8080"
+    networks:
+      - mongo_default
+
+networks:
+  mongo_default:
+    external: true

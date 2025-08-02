@@ -19,10 +19,33 @@ def get_state_name(state):
     }
     return states.get(state, f"UNKNOWN({state})")
 
+def find_primary():
+    """Find the current primary node by checking all nodes"""
+    mongo_ports = [27030, 27031, 27032]
+    
+    for port in mongo_ports:
+        try:
+            uri = f"mongodb://mongo-0:mongo-0@127.0.0.1:{port}/admin?directConnection=true&authSource=admin"
+            client = MongoClient(uri, serverSelectionTimeoutMS=3000)
+            
+            # Check if this node is primary
+            result = client.admin.command('isMaster')
+            if result.get('ismaster', False):
+                client.close()
+                return port
+            else:
+                client.close()
+                
+        except Exception:
+            continue
+    
+    raise Exception("Could not find any primary node")
+
 def check_replicaset_status():
     try:
-        # Connect to MongoDB using the primary node port with authentication
-        connection_string = 'mongodb://mongo-0:mongo-0@127.0.0.1:27034/?replicaSet=rs0&authSource=admin'
+        # Find and connect to current primary
+        primary_port = find_primary()
+        connection_string = f'mongodb://mongo-0:mongo-0@127.0.0.1:{primary_port}/admin?directConnection=true&authSource=admin'
         client = MongoClient(connection_string)
         
         # Get replica set status

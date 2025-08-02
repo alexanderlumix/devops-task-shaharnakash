@@ -1,18 +1,47 @@
 import pymongo
 
 MONGO_HOST = '127.0.0.1'
-MONGO_PORT = 27031
-ADMIN_USER = 'mongo-1'
-ADMIN_PASS = 'mongo-1'
+ADMIN_USER = 'mongo-0'
+ADMIN_PASS = 'mongo-0'
 
 APP_DB = 'appdb'
 APP_USER = 'appuser'
 APP_PASS = 'appuserpassword'
 
+def find_primary():
+    """Find the current primary node by checking all nodes"""
+    mongo_ports = [27030, 27031, 27032]
+    
+    for port in mongo_ports:
+        try:
+            print(f"🔍 Checking node on port {port}...")
+            uri = f"mongodb://{ADMIN_USER}:{ADMIN_PASS}@{MONGO_HOST}:{port}/admin?directConnection=true&authSource=admin"
+            client = pymongo.MongoClient(uri, serverSelectionTimeoutMS=3000)
+            
+            # Check if this node is primary
+            result = client.admin.command('isMaster')
+            if result.get('ismaster', False):
+                print(f"✅ Found primary on port {port}")
+                client.close()
+                return port
+            else:
+                print(f"⚠️ Port {port} is secondary")
+                client.close()
+                
+        except Exception as e:
+            print(f"❌ Port {port} failed: {str(e)[:50]}...")
+            continue
+    
+    raise Exception("❌ Could not find any primary node")
 
 def create_app_user():
-    uri = f"mongodb://{ADMIN_USER}:{ADMIN_PASS}@{MONGO_HOST}:{MONGO_PORT}/admin?replicaSet=rs0&authSource=admin"
+    # First, find the current primary
+    primary_port = find_primary()
+    
+    # Connect directly to the primary
+    uri = f"mongodb://{ADMIN_USER}:{ADMIN_PASS}@{MONGO_HOST}:{primary_port}/admin?directConnection=true&authSource=admin"
     client = pymongo.MongoClient(uri, serverSelectionTimeoutMS=5000)
+    print(f"🚀 Connected to primary on port {primary_port}")
     db = client[APP_DB]
     try:
         db.command("createUser", APP_USER,

@@ -13,6 +13,7 @@ services:
     image: mongo:7.0.16
     container_name: mongo-0
     restart: unless-stopped
+    command: mongod --port 27030 --bind_ip_all --replSet rs0 --keyFile /etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo-0
       MONGO_INITDB_ROOT_PASSWORD: mongo-0
@@ -32,6 +33,7 @@ services:
     image: mongo:7.0.16
     container_name: mongo-1
     restart: unless-stopped
+    command: mongod --port 27031 --bind_ip_all --replSet rs0 --keyFile /etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo-1
       MONGO_INITDB_ROOT_PASSWORD: mongo-1
@@ -51,6 +53,7 @@ services:
     image: mongo:7.0.16
     container_name: mongo-2
     restart: unless-stopped
+    command: mongod --port 27032 --bind_ip_all --replSet rs0 --keyFile /etc/mongo-keyfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo-2
       MONGO_INITDB_ROOT_PASSWORD: mongo-2

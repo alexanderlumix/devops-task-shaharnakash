@@ -23,3 +23,9 @@ python init_mongo_servers.py
 ```
 
 Found `Collection [local.oplog.rs] not found`
+
+## Fix configuration
+
+Remove backup on `haproxy.cfg` to allow HA.
+
+Reinitialized replicaset.

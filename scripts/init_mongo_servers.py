@@ -53,9 +53,11 @@ def init_primary(server):
 
 def main():
     config = load_config(CONFIG_FILE)
-    for idx, server in enumerate(config['servers']):
-        test_connection(server)
-    init_primary(config['servers'][0])
+    # Only test connection to mongo-0 to avoid authentication errors during initialization
+    # Note: mongo-0 has the initial admin user from MONGO_INITDB_*, others get it via replication
+    primary_server = config['servers'][0]  # mongo-0
+    test_connection(primary_server)
+    init_primary(primary_server)
 
 if __name__ == '__main__':
     main()

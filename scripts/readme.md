@@ -29,3 +29,11 @@ Found `Collection [local.oplog.rs] not found`
 Remove backup on `haproxy.cfg` to allow HA.
 
 Reinitialized replicaset.
+
+## Fix rs_config
+
+Use container mongo name
+
+## Fix create user to run on primary node
+
+## Create script to fix replica hostnames
